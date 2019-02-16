@@ -8,8 +8,8 @@ probfit - Cost function builder. For fitting distributions.
 
 from .costfunc import UnbinnedLH, BinnedLH, Chi2Regression, BinnedChi2,\
  SimultaneousFit
-from .pdf import doublegaussian, doublecrystalball, ugaussian, gaussian, crystalball, \
-    argus, cruijff, linear, poly2, poly3, novosibirsk, \
+from .pdf import doublegaussian, doublecrystalball, ugaussian, gaussian, chisquared, \
+    crystalball, argus, cruijff, linear, poly2, poly3, novosibirsk, \
     Polynomial, HistogramPdf, cauchy, rtv_breitwigner, johnsonSU, \
     exponential
 
@@ -55,6 +55,7 @@ __all__ = [
     'extended',
     'fwhm_f',
     'gaussian',
+    'chisquared',
     'gen_toy',
     'gen_toyn',
     'integrate1d',

@@ -3,6 +3,7 @@ import os
 from setuptools import setup
 from setuptools.extension import Extension
 
+import cython_gsl
 import numpy as np
 
 try:
@@ -20,7 +21,9 @@ for source_file in glob('probfit/*' + ext):
     extensions.append(
         Extension('probfit.{0}'.format(fname),
                   sources=['probfit/{0}{1}'.format(fname, ext)],
-                  include_dirs=[np.get_include()])
+                  libraries=cython_gsl.get_libraries(),
+                  library_dirs=['/usr/local/lib',cython_gsl.get_library_dir()],
+                  include_dirs=['/usr/local/include',cython_gsl.get_cython_include_dir(),np.get_include()])
     )
 
 if USE_CYTHON:
@@ -50,7 +53,8 @@ setup(
     install_requires=[
         'setuptools',
         'numpy',
-        'iminuit'
+        'iminuit',
+        'cythongsl'
     ],
     classifiers=[
         "Programming Language :: Python",

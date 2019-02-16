@@ -2,6 +2,7 @@
 cimport cython
 
 from libc.math cimport exp, pow, fabs, log, sqrt, sinh, tgamma, abs, fabs, cosh, atan2, asinh, erf
+from cython_gsl cimport gsl_ran_chisq_pdf, gsl_cdf_chisq_P
 cdef double pi = 3.14159265358979323846264338327
 import numpy as np
 cimport numpy as np
@@ -268,7 +269,6 @@ cpdef double gaussian(double x, double mean, double sigma):
         d2 = d*d
         ret = 1/(sqrt(2*pi)*sigma)*exp(-0.5*d2)
     return ret
-
 
 cpdef double crystalball(double x, double alpha, double n, double mean, double sigma):
     """
@@ -617,3 +617,69 @@ cdef class _Exponential:
 
 
 exponential = _Exponential()
+
+
+cdef class _ChiSquared:
+    """
+    ChiSquared [1]_.
+
+    .. math::
+        f(x;k) =
+        \\begin{cases}
+            \\frac{1}{2^{k/2} \\Gamma{k/2}} x^{k/2 - 1} \\exp\\left(-x/2\\right) \\\\
+            0 & \\mbox{if } \\x < 0 or k <= 0
+        \\end{cases}
+
+    References
+    ----------
+
+    .. [1] https://en.wikipedia.org/wiki/Chi-squared_distribution
+
+    """
+    cdef public object func_code
+    cdef public object func_defaults
+
+    def __init__(self, xname='x'):
+
+        varnames = [xname, "k"]
+        self.func_code = MinimalFuncCode(varnames)
+        self.func_defaults = None
+
+    def __call__(self, *arg):
+
+        cdef double x = arg[0]
+        cdef double _k = arg[1]
+        cdef double ret = 0
+
+        if x >= 0 and _k > 0:
+            ret = gsl_ran_chisq_pdf(x, _k)
+        else:
+            ret = 0.
+
+        return ret
+
+    def cdf(self, x, _k):
+
+        cdef double ret = 0
+
+        if x >= 0 and _k > 0:
+            ret = gsl_cdf_chisq_P(x, _k)
+        else:
+            ret = 0.
+
+        return ret
+
+    def integrate(self, tuple bound, int nint_subdiv, *arg):
+
+        cdef double a, b
+        a, b = bound
+
+        cdef double _k = arg[0]
+
+        Fa = self.cdf(a, _k)
+        Fb = self.cdf(b, _k)
+
+        return Fb - Fa
+
+
+chisquared = _ChiSquared()
